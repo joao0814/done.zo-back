@@ -20,7 +20,5 @@ Este projeto foi criado com o objetivo de consolidar conhecimentos em:
 - dotenv
 - cors
 
----
 
-## 📂 Estrutura do Projeto
 
