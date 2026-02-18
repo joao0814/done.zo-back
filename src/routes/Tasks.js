@@ -1,8 +1,22 @@
 const express = require("express");
 const pool = require("../db");
 
+//GET
 const router = express.Router();
+router.get("/tasks", async (req, res) => {
+  try {
+    const query = `SELECT titulo, descricao FROM tasks`;
 
+    const result = await pool.query(query);
+
+    return res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Erro ao buscar tarefas:", error);
+    return res.status(500).json({ message: "Erro ao buscar tarefas." });
+  }
+});
+
+//POST
 router.post("/tasks", async (req, res) => {
   const { titulo, descricao } = req.body;
 
