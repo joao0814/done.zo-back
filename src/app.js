@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const postTasksRouter = require("./routes/Tasks");
 const getTasksRouter = require("./routes/Tasks");
+const putTasksRouter = require("./routes/Tasks");
 
 const app = express();
 
@@ -14,5 +15,6 @@ app.get("/", (req, res) => {
 
 app.use(postTasksRouter);
 app.use(getTasksRouter);
+app.use(putTasksRouter);
 
 module.exports = app;
