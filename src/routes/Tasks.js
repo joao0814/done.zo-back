@@ -80,4 +80,29 @@ router.put("/tasks/:id", async (req, res) => {
   }
 });
 
+//DELETE
+router.delete("/tasks/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const query = `
+    DELETE FROM tasks WHERE id = $1 RETURNING *;
+    `;
+
+    const result = await pool.query(query, [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Tarefa não encontrada." });
+    }
+
+    return res.status(200).json({
+      message: "Tarefa deletada com sucesso.",
+      task: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Erro ao deletar tarefa:", error);
+    return res.status(500).json({ message: "Erro ao deletar tarefa." });
+  }
+});
+
 module.exports = router;
