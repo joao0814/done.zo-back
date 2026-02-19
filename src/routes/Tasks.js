@@ -4,7 +4,7 @@ const pool = require("../db");
 const router = express.Router();
 
 //POST
-router.post("/tasks", async (req, res) => {
+router.post("/", async (req, res) => {
   const { titulo, descricao } = req.body;
 
   if (!titulo || !descricao) {
@@ -35,7 +35,7 @@ router.post("/tasks", async (req, res) => {
 });
 
 //GET
-router.get("/tasks", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const query = `SELECT id, titulo, descricao FROM tasks`;
 
@@ -49,7 +49,7 @@ router.get("/tasks", async (req, res) => {
 });
 
 //PUT
-router.put("/tasks/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { titulo, descricao } = req.body;
 
@@ -81,7 +81,7 @@ router.put("/tasks/:id", async (req, res) => {
 });
 
 //DELETE
-router.delete("/tasks/:id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
