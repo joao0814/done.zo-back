@@ -38,7 +38,7 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const userId = req.userId;
-    const query = `SELECT id, titulo, descricao FROM tasks WHERE id_usuario = $1;`;
+    const query = `SELECT id, titulo, tipo, descricao FROM tasks WHERE id_usuario = $1;`;
 
     const result = await pool.query(query, [userId]);
 
@@ -56,11 +56,9 @@ router.put("/:id", async (req, res) => {
   const userId = req.userId;
 
   if (!titulo || !tipo || !descricao) {
-    return res
-      .status(400)
-      .json({
-        message: "Campos 'titulo', 'tipo' e 'descricao' são obrigatórios.",
-      });
+    return res.status(400).json({
+      message: "Campos 'titulo', 'tipo' e 'descricao' são obrigatórios.",
+    });
   }
 
   try {
