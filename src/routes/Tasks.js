@@ -5,23 +5,23 @@ const router = express.Router();
 
 //POST
 router.post("/", async (req, res) => {
-  const { titulo, descricao } = req.body;
+  const { titulo, tipo, descricao } = req.body;
   const userId = req.userId;
 
-  if (!titulo || !descricao) {
-    return res
-      .status(400)
-      .json({ message: "Campos 'titulo' e 'descricao' são obrigatórios." });
+  if (!titulo || !tipo || !descricao) {
+    return res.status(400).json({
+      message: "Campos 'titulo', 'tipo' e 'descricao' são obrigatórios.",
+    });
   }
 
   try {
     const query = `
-      INSERT INTO tasks (titulo, descricao, id_usuario)
-      VALUES ($1, $2, $3)
-      RETURNING id, titulo, descricao;
+      INSERT INTO tasks (titulo, tipo, descricao, id_usuario)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id, titulo, tipo, descricao;
     `;
 
-    const values = [titulo, descricao, userId];
+    const values = [titulo, tipo, descricao, userId];
     const result = await pool.query(query, values);
 
     return res.status(201).json({
@@ -52,23 +52,25 @@ router.get("/", async (req, res) => {
 //PUT
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { titulo, descricao } = req.body;
+  const { titulo, tipo, descricao } = req.body;
   const userId = req.userId;
 
-  if (!titulo || !descricao) {
+  if (!titulo || !tipo || !descricao) {
     return res
       .status(400)
-      .json({ message: "Campos 'titulo' e 'descricao' são obrigatórios." });
+      .json({
+        message: "Campos 'titulo', 'tipo' e 'descricao' são obrigatórios.",
+      });
   }
 
   try {
     const query = `
-    UPDATE tasks SET titulo = $1, descricao = $2, data_atualizacao = CURRENT_TIMESTAMP
-    WHERE id = $3 AND id_usuario = $4
+    UPDATE tasks SET titulo = $1, tipo = $2, descricao = $3, data_atualizacao = CURRENT_TIMESTAMP
+    WHERE id = $4 AND id_usuario = $5
     RETURNING *;
     `;
 
-    const values = [titulo, descricao, id, userId];
+    const values = [titulo, tipo, descricao, id, userId];
     const result = await pool.query(query, values);
 
     return res.status(200).json({
