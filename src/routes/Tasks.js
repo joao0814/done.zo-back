@@ -6,6 +6,7 @@ const router = express.Router();
 //POST
 router.post("/", async (req, res) => {
   const { titulo, descricao } = req.body;
+  const userId = req.userId;
 
   if (!titulo || !descricao) {
     return res
@@ -15,13 +16,12 @@ router.post("/", async (req, res) => {
 
   try {
     const query = `
-      INSERT INTO tasks (titulo, descricao)
-      VALUES ($1, $2)
+      INSERT INTO tasks (titulo, descricao, id_usuario)
+      VALUES ($1, $2, $3)
       RETURNING id, titulo, descricao;
     `;
 
-    const values = [titulo, descricao];
-
+    const values = [titulo, descricao, userId];
     const result = await pool.query(query, values);
 
     return res.status(201).json({
@@ -37,9 +37,10 @@ router.post("/", async (req, res) => {
 //GET
 router.get("/", async (req, res) => {
   try {
-    const query = `SELECT id, titulo, descricao FROM tasks`;
+    const userId = req.userId;
+    const query = `SELECT id, titulo, descricao FROM tasks WHERE id_usuario = $1;`;
 
-    const result = await pool.query(query);
+    const result = await pool.query(query, [userId]);
 
     return res.status(200).json(result.rows);
   } catch (error) {
@@ -52,6 +53,7 @@ router.get("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { titulo, descricao } = req.body;
+  const userId = req.userId;
 
   if (!titulo || !descricao) {
     return res
@@ -62,12 +64,11 @@ router.put("/:id", async (req, res) => {
   try {
     const query = `
     UPDATE tasks SET titulo = $1, descricao = $2, data_atualizacao = CURRENT_TIMESTAMP
-    WHERE id = $3 
+    WHERE id = $3 AND id_usuario = $4
     RETURNING *;
     `;
 
-    const values = [titulo, descricao, id];
-
+    const values = [titulo, descricao, id, userId];
     const result = await pool.query(query, values);
 
     return res.status(200).json({
@@ -83,13 +84,15 @@ router.put("/:id", async (req, res) => {
 //DELETE
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
+  const userId = req.userId;
 
   try {
     const query = `
-    DELETE FROM tasks WHERE id = $1 RETURNING *;
+    DELETE FROM tasks WHERE id = $1 AND id_usuario = $2 RETURNING *;
     `;
 
-    const result = await pool.query(query, [id]);
+    const values = [id, userId];
+    const result = await pool.query(query, values);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ message: "Tarefa não encontrada." });
