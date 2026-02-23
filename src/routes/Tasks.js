@@ -5,7 +5,8 @@ const router = express.Router();
 
 //POST
 router.post("/", async (req, res) => {
-  const { titulo, tipo, descricao } = req.body;
+  const { titulo, tipo, descricao, prioridade, data_limite, estimativa } =
+    req.body;
   const userId = req.userId;
 
   if (!titulo || !tipo || !descricao) {
@@ -16,12 +17,21 @@ router.post("/", async (req, res) => {
 
   try {
     const query = `
-      INSERT INTO tasks (titulo, tipo, descricao, id_usuario)
-      VALUES ($1, $2, $3, $4)
-      RETURNING id, titulo, tipo, descricao;
+      INSERT INTO tasks (titulo, tipo, descricao, id_usuario, prioridade, data_limite, concluida_em, estimativa)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING id, titulo, tipo, descricao, prioridade, data_limite, concluida_em, estimativa;
     `;
 
-    const values = [titulo, tipo, descricao, userId];
+    const values = [
+      titulo,
+      tipo,
+      descricao,
+      userId,
+      prioridade,
+      data_limite,
+      null,
+      estimativa,
+    ];
     const result = await pool.query(query, values);
 
     return res.status(201).json({
@@ -38,7 +48,10 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const userId = req.userId;
-    const query = `SELECT id, titulo, tipo, descricao FROM tasks WHERE id_usuario = $1;`;
+    const query = `
+      SELECT id, titulo, tipo, descricao, id_usuario, prioridade, data_limite, concluida_em, estimativa_minutos 
+      FROM tasks WHERE id_usuario = $1;
+    `;
 
     const result = await pool.query(query, [userId]);
 
