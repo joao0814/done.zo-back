@@ -49,7 +49,7 @@ router.get("/", async (req, res) => {
   try {
     const userId = req.userId;
     const query = `
-      SELECT id, titulo, tipo, descricao, id_usuario, prioridade, data_limite, concluida_em, estimativa_minutos 
+      SELECT id, titulo, tipo, descricao, id_usuario, prioridade, data_limite, concluida_em, estimativa 
       FROM tasks WHERE id_usuario = $1;
     `;
 
