@@ -44,7 +44,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-//GET
+//GET TASKS
 router.get("/", async (req, res) => {
   try {
     const userId = req.userId;
@@ -118,6 +118,58 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     console.error("Erro ao deletar tarefa:", error);
     return res.status(500).json({ message: "Erro ao deletar tarefa." });
+  }
+});
+
+// GET METRICS
+router.get("/metrics", async (req, res) => {
+  const userId = req.userId;
+
+  try {
+    const query = `
+      SELECT 
+
+        COALESCE(COUNT(*) FILTER (WHERE prioridade = 'alta'), 0) as alta,
+        COALESCE(COUNT(*) FILTER (WHERE prioridade = 'media'), 0) as media,
+        COALESCE(COUNT(*) FILTER (WHERE prioridade = 'baixa'), 0) as baixa,
+        
+        COALESCE(COUNT(*) FILTER (WHERE concluida_em IS NULL AND data_limite < CURRENT_TIMESTAMP), 0) as atrasadas,
+        
+        COALESCE(ROUND(SUM(estimativa) / 60.0, 2), 0) as total_horas_estimadas,
+        
+        COUNT(*) as total_geral
+
+      FROM tasks 
+      WHERE id_usuario = $1;
+    `;
+
+    const result = await pool.query(query, [userId]);
+    const metrics = result.rows[0];
+
+    if (!metrics) {
+      return res.status(200).json({ message: "Nenhum dado encontrado." });
+    }
+
+    return res.status(200).json({
+      prioridades: {
+        alta: parseInt(metrics.alta) || 0,
+        media: parseInt(metrics.media) || 0,
+        baixa: parseInt(metrics.baixa) || 0,
+      },
+      prazos: {
+        atrasadas: parseInt(metrics.atrasadas) || 0,
+        em_dia:
+          (parseInt(metrics.total_geral) || 0) -
+          (parseInt(metrics.atrasadas) || 0),
+      },
+      planejamento: {
+        horas_estimadas: parseFloat(metrics.total_horas_estimadas) || 0,
+        total_tarefas: parseInt(metrics.total_geral) || 0,
+      },
+    });
+  } catch (error) {
+    console.error("Erro ao calcular métricas:", error);
+    return res.status(500).json({ message: "Erro ao gerar dashboard." });
   }
 });
 
