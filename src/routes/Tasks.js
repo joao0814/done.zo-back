@@ -65,23 +65,23 @@ router.get("/", async (req, res) => {
 //PUT
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { titulo, tipo, descricao } = req.body;
+  const { titulo, tipo, descricao, prioridade, data_limite, estimativa } = req.body;
   const userId = req.userId;
 
-  if (!titulo || !tipo || !descricao) {
+  if (!titulo || !tipo || !descricao || !prioridade || !data_limite || !estimativa) {
     return res.status(400).json({
-      message: "Campos 'titulo', 'tipo' e 'descricao' são obrigatórios.",
+      message: "Campos 'titulo', 'tipo', 'descricao', 'prioridade', 'data_limite' e 'estimativa' são obrigatórios.",
     });
   }
 
   try {
     const query = `
-    UPDATE tasks SET titulo = $1, tipo = $2, descricao = $3, data_atualizacao = CURRENT_TIMESTAMP
-    WHERE id = $4 AND id_usuario = $5
+    UPDATE tasks SET titulo = $1, tipo = $2, descricao = $3, prioridade = $4, data_limite = $5, estimativa = $6, data_atualizacao = CURRENT_TIMESTAMP
+    WHERE id = $7 AND id_usuario = $8
     RETURNING *;
     `;
 
-    const values = [titulo, tipo, descricao, id, userId];
+    const values = [titulo, tipo, descricao, prioridade, data_limite, estimativa, id, userId];
     const result = await pool.query(query, values);
 
     return res.status(200).json({

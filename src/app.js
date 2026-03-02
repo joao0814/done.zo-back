@@ -14,9 +14,5 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRouter);
-app.use(
-  "/tasks",
-  //  authMiddleware,
-  taskRouter,
-);
+app.use("/tasks", authMiddleware, taskRouter);
 module.exports = app;
